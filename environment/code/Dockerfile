@@ -1,4 +1,4 @@
-FROM ghcr.io/marcelauliano/mitohifi-base:b3.2.3
+FROM mitohifi-base
 
 COPY . /opt/MitoHiFi
 
