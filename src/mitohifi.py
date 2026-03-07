@@ -54,6 +54,7 @@ def main():
     required.add_argument("-g", help= "-k: Close-related species Mitogenome in genebank format", required = "True", metavar='<relatedMito>.gbk')
     required.add_argument("-t", help= "-t: Number of threads for (i) hifiasm and (ii) the blast search", required = "True", type=int, metavar='<THREADS>')    
     optional.add_argument("-d", help="-d: debug mode to output additional info on log", action="store_true")    
+    optional.add_argument("--ont", help="Use Oxford Nanopore (ONT) settings instead of PacBio HiFi for minimap2 and hifiasm", action="store_true")
     optional.add_argument("-a", help="-a: Choose between animal (default) or plant", default="animal", choices=["animal", "plant", "fungi"])
     optional.add_argument("-p", help="-p: Percentage of query in the blast match with close-related mito", type=int, default=50, metavar='<PERC>')
     optional.add_argument("-m", help="-m: Number of bits for HiFiasm bloom filter [it maps to -f in HiFiasm] (default = 0)", type=int, default=0, metavar='<BLOOM FILTER>')
@@ -99,7 +100,11 @@ def main():
     if args.r:
         logging.info("Running MitoHifi pipeline in reads mode...")
         logging.info("1. First we map your Pacbio HiFi reads to the close-related mitogenome")
-        minimap_cmd = ["minimap2", "-t", str(args.t), "--secondary=no", "-ax", "map-hifi", args.f] + shlex.split(args.r) 
+        # Choose minimap2 preset depending on sequencing technology
+        minimap_preset = "map-hifi"
+        if args.ont:
+            minimap_preset = "map-ont"
+        minimap_cmd = ["minimap2", "-t", str(args.t), "--secondary=no", "-ax", minimap_preset, args.f] + shlex.split(args.r)
         samtools_cmd = ["samtools", "view", "-@", str(args.t), "-b", "-F4", "-F", "0x800", "-o", "reads.HiFiMapped.bam"] 
         logging.info(" ".join(minimap_cmd) + " | " + " ".join(samtools_cmd))        
         minimap = subprocess.Popen(minimap_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
@@ -146,7 +151,17 @@ def main():
         hifiasm_cmd = ["hifiasm", "--primary", "-t", str(args.t), "-f", str(args.m), 
                     "-o", "gbk.HiFiMapped.bam.filtered.assembled",
                     "gbk.HiFiMapped.bam.filtered.fasta"]
+        
+#### THE HIFIASM_CMD CAN BE REPLACED WITH THE COMMANDS BELOW WHEN HIFIASM WITHIN MITOHIFI IS UPDATED TO THE NEWEST VERSION ####        
+#        hifiasm_cmd = ["hifiasm"]
 
+        # Add ONT mode if requested
+#        if args.ont:
+#            hifiasm_cmd.append("--ont")
+
+#        hifiasm_cmd.extend(["--primary", "-t", str(args.t), "-f", str(args.m), "-o", 
+#            "gbk.HiFiMapped.bam.filtered.assembled", "gbk.HiFiMapped.bam.filtered.fasta"])
+        
         logging.info(" ".join(hifiasm_cmd))
         with open("hifiasm.log", "w") as hifiasm_log_f:
             subprocess.run(hifiasm_cmd, stderr=subprocess.STDOUT, stdout=hifiasm_log_f)       
