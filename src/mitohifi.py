@@ -40,7 +40,7 @@ import plot_annotation
 
 def main():
     
-    __version__ = '3.2.1'
+    __version__ = '3.2.4beta'
     start_time = time.time()
 
     parser = argparse.ArgumentParser(prog='MitoHiFi')
@@ -148,19 +148,19 @@ def main():
 
         logging.info("3. Now let's run hifiasm to assemble the mapped and filtered reads!")
         
-        hifiasm_cmd = ["hifiasm", "--primary", "-t", str(args.t), "-f", str(args.m), 
-                    "-o", "gbk.HiFiMapped.bam.filtered.assembled",
-                    "gbk.HiFiMapped.bam.filtered.fasta"]
+#        hifiasm_cmd = ["hifiasm", "--primary", "-t", str(args.t), "-f", str(args.m), 
+#                    "-o", "gbk.HiFiMapped.bam.filtered.assembled",
+#                    "gbk.HiFiMapped.bam.filtered.fasta"]
         
 #### THE HIFIASM_CMD CAN BE REPLACED WITH THE COMMANDS BELOW WHEN HIFIASM WITHIN MITOHIFI IS UPDATED TO THE NEWEST VERSION ####        
-#        hifiasm_cmd = ["hifiasm"]
+        hifiasm_cmd = ["hifiasm"]
 
         # Add ONT mode if requested
-#        if args.ont:
-#            hifiasm_cmd.append("--ont")
+        if args.ont:
+            hifiasm_cmd.append("--ont")
 
-#        hifiasm_cmd.extend(["--primary", "-t", str(args.t), "-f", str(args.m), "-o", 
-#            "gbk.HiFiMapped.bam.filtered.assembled", "gbk.HiFiMapped.bam.filtered.fasta"])
+        hifiasm_cmd.extend(["--primary", "-t", str(args.t), "-f", str(args.m), "-o", 
+            "gbk.HiFiMapped.bam.filtered.assembled", "gbk.HiFiMapped.bam.filtered.fasta"])
         
         logging.info(" ".join(hifiasm_cmd))
         with open("hifiasm.log", "w") as hifiasm_log_f:
