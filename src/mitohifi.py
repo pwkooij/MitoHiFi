@@ -155,7 +155,7 @@ def main():
             after_filter = fetch.get_num_seqs("gbk.HiFiMapped.bam.filtered.fastq")
             logging.info(f"Number of filtered reads: {after_filter}")
         
-            else:
+        else:
             # -----------------------------
             # Original HiFi workflow (FASTA)
             # -----------------------------
