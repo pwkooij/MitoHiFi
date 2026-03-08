@@ -195,9 +195,12 @@ def main():
         # Add ONT mode if requested
         if args.ont:
             hifiasm_cmd.append("--ont")
+            input_reads = "gbk.HiFiMapped.bam.filtered.fastq"
+        else:
+            input_reads = "gbk.HiFiMapped.bam.filtered.fasta"
 
         hifiasm_cmd.extend(["--primary", "-t", str(args.t), "-f", str(args.m), "-o", 
-            "gbk.HiFiMapped.bam.filtered.assembled", "gbk.HiFiMapped.bam.filtered.fasta"])
+            "gbk.HiFiMapped.bam.filtered.assembled", input_reads])
         
         logging.info(" ".join(hifiasm_cmd))
         with open("hifiasm.log", "w") as hifiasm_log_f:
