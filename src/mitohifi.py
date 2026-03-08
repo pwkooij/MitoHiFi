@@ -122,29 +122,66 @@ def main():
             f.close()
 
         logging.info("2. Now we filter out any mapped reads that are larger than the reference mitogenome to avoid NUMTS")
-        bam2fasta_cmd = ["samtools", "fasta", "reads.HiFiMapped.bam"]
-        logging.info("2.1 First we convert the mapped reads from BAM to FASTA format:")
-        logging.info(" ".join(bam2fasta_cmd) + " > gbk.HiFiMapped.bam.fasta")
-        mapped_fasta_f = open("gbk.HiFiMapped.bam.fasta", "w")
-        subprocess.run(bam2fasta_cmd, stdout=mapped_fasta_f, stderr=subprocess.DEVNULL)
-        before_filter = fetch.get_num_seqs("gbk.HiFiMapped.bam.fasta")
-        logging.info(f"Total number of mapped reads: {before_filter}")
-        
-        max_read_len = round(args.max_read_len * rel_mito_len)
-        logging.info(f"2.2 Then we filter reads that are larger than {max_read_len} bp")
-        filterfasta.filterFasta(minLength=max_read_len, neg=True, inStream="gbk.HiFiMapped.bam.fasta",
-                                outPath="gbk.HiFiMapped.bam.filtered.fasta", log=False)
-        
-        try:
-            f = open("gbk.HiFiMapped.bam.filtered.fasta")
-        except FileNotFoundError:
-            sys.exit("""No gbk.HiFiMapped.bam.filtered.fasta file.
-            An error may have occurred when filtering reads larger than the reference mitogenome""")
-        finally:
-            f.close()
+        if args.ont:
+            # -----------------------------
+            # ONT workflow (FASTQ)
+            # -----------------------------
+            bam2fastq_cmd = ["samtools", "fastq", "reads.HiFiMapped.bam"]
+            logging.info("2.1 First we convert the mapped reads from BAM to FASTQ format:")
+            logging.info(" ".join(bam2fastq_cmd) + " > gbk.HiFiMapped.bam.fastq")
+            mapped_fastq_f = open("gbk.HiFiMapped.bam.fastq", "w")
+            subprocess.run(bam2fastq_cmd, stdout=mapped_fastq_f, stderr=subprocess.DEVNULL)
+            before_filter = fetch.get_num_seqs("gbk.HiFiMapped.bam.fastq")
+            logging.info(f"Total number of mapped reads: {before_filter}")
 
-        after_filter = fetch.get_num_seqs("gbk.HiFiMapped.bam.filtered.fasta")
-        logging.info(f"Number of filtered reads: {after_filter}")
+            max_read_len = round(args.max_read_len * rel_mito_len)
+            logging.info(f"2.2 Then we filter reads that are larger than {max_read_len} bp (FASTQ)")
+
+            with open("gbk.HiFiMapped.bam.fastq") as infile, \
+                 open("gbk.HiFiMapped.bam.filtered.fastq", "w") as outfile:
+
+                for record in SeqIO.parse(infile, "fastq"):
+                    if len(record.seq) <= max_read_len:
+                        SeqIO.write(record, outfile, "fastq")
+
+            try:
+                f = open("gbk.HiFiMapped.bam.filtered.fastq")
+            except FileNotFoundError:
+                sys.exit("""No gbk.HiFiMapped.bam.filtered.fastq file.
+                An error may have occurred when filtering reads larger than the reference mitogenome""")
+            finally:
+                f.close()
+
+            after_filter = fetch.get_num_seqs("gbk.HiFiMapped.bam.filtered.fastq")
+            logging.info(f"Number of filtered reads: {after_filter}")
+        
+            else:
+            # -----------------------------
+            # Original HiFi workflow (FASTA)
+            # -----------------------------
+            bam2fasta_cmd = ["samtools", "fasta", "reads.HiFiMapped.bam"]
+            logging.info("2.1 First we convert the mapped reads from BAM to FASTA format:")
+            logging.info(" ".join(bam2fasta_cmd) + " > gbk.HiFiMapped.bam.fasta")
+            mapped_fasta_f = open("gbk.HiFiMapped.bam.fasta", "w")
+            subprocess.run(bam2fasta_cmd, stdout=mapped_fasta_f, stderr=subprocess.DEVNULL)
+            before_filter = fetch.get_num_seqs("gbk.HiFiMapped.bam.fasta")
+            logging.info(f"Total number of mapped reads: {before_filter}")
+
+            max_read_len = round(args.max_read_len * rel_mito_len)
+            logging.info(f"2.2 Then we filter reads that are larger than {max_read_len} bp")
+            filterfasta.filterFasta(minLength=max_read_len, neg=True, inStream="gbk.HiFiMapped.bam.fasta",
+                                    outPath="gbk.HiFiMapped.bam.filtered.fasta", log=False)
+
+            try:
+                f = open("gbk.HiFiMapped.bam.filtered.fasta")
+            except FileNotFoundError:
+                sys.exit("""No gbk.HiFiMapped.bam.filtered.fasta file.
+                An error may have occurred when filtering reads larger than the reference mitogenome""")
+            finally:
+                f.close()
+
+            after_filter = fetch.get_num_seqs("gbk.HiFiMapped.bam.filtered.fasta")
+            logging.info(f"Number of filtered reads: {after_filter}")
 
         logging.info("3. Now let's run hifiasm to assemble the mapped and filtered reads!")
         
