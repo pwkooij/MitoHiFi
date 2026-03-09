@@ -3,14 +3,14 @@
 
 I tested this version with a singularity container and that worked. I made sure it is running with the hifiasm v0.25.0. I also had to make sure that for the ONT version minimap2 results would be transformed into fastq rather than fasta.
 I did have to make some adjustments in the docker files in order to create the docker containers from which I made the singularity container. Therefore, here some installation instructions:
-'''
+```
 git clone https://github.com/pwkooij/MitoHiFi/
 cd MitoHiFi/environment/base
 docker build -t mitohifi-base .
 cd ../..
 docker build -t mitohifi -f environment/code/Dockerfile .
 singularity build mitohifi_ont_version.sif docker-daemon://mitohifi:latest
-'''
+```
 Now the 'mitohifi.py' should work within the singularity container. By adding the '--ont' tag it should run both minimap2 and hifiasm with the ONT settings.
 
 Hope this helps for those of us working with ONT!
