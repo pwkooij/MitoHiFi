@@ -63,7 +63,7 @@ def get_contigs_to_map():
     return contigs_to_map
 
 
-def map_potential_contigs(in_reads, contigs, threads=1, covMap=20): 
+def map_potential_contigs(in_reads, contigs, threads=1, covMap=20, ont=False): 
     """
     Args:
         in_reads (list): reads file to be mapped against contigs
@@ -91,7 +91,8 @@ def map_potential_contigs(in_reads, contigs, threads=1, covMap=20):
    #             outfile.write(infile.read())
     
     # map reads against concatenated contigs file
-    minimap_cmd = ["minimap2", "-t", str(threads), "--secondary=no", "-ax", "map-pb", concatenated_contigs] + in_reads
+    preset = "map-ont" if ont else "map-pb"
+    minimap_cmd = ["minimap2","-t", str(threads),"--secondary=no","-ax", preset, concatenated_contigs] + in_reads
     samtools_cmd = ["samtools", "view", "-@", str(threads), "-b", "-F4", "-F", "0x800", "-q", str(covMap), "-o", "HiFi-vs-potential_contigs.bam"]
     logging.info("Reads mapping:")
     logging.info(" ".join(minimap_cmd) + " | " + " ".join(samtools_cmd))
@@ -132,7 +133,7 @@ def map_potential_contigs(in_reads, contigs, threads=1, covMap=20):
     
     return "HiFi-vs-potential_contigs.sorted.bam"
 
-def map_final_mito(in_reads, threads=1, covMap=20): 
+def map_final_mito(in_reads, threads=1, covMap=20, ont=False): 
     """
     Args:
         in_reads (list): reads file to be mapped against contigs
@@ -150,7 +151,8 @@ def map_final_mito(in_reads, threads=1, covMap=20):
         An error may have occurred when choosing the representative contig.""")
     
     # map reads 
-    minimap_cmd = ["minimap2", "-t", str(threads), "--secondary=no", "-ax", "map-pb", "final_mitogenome.fasta"] + in_reads
+    preset = "map-ont" if ont else "map-pb"
+    minimap_cmd = ["minimap2", "-t", str(threads), "--secondary=no", "-ax", preset, "final_mitogenome.fasta"] + in_reads
     samtools_cmd = ["samtools", "view", "-@", str(threads), "-b", "-F4", "-F", "0x800", "-q", str(covMap), "-o", "HiFi-vs-final_mitogenome.bam"]
     logging.info("Reads mapping:")
     logging.info(" ".join(minimap_cmd) + " | " + " ".join(samtools_cmd))
