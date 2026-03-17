@@ -90,6 +90,10 @@ def map_potential_contigs(in_reads, contigs, threads=1, covMap=20, ont=False):
    #         with open(f) as infile:
    #             outfile.write(infile.read())
     
+    # Override covMap if ONT
+    if ont:
+        covMap = 5
+        
     # map reads against concatenated contigs file
     preset = "map-ont" if ont else "map-pb"
     minimap_cmd = ["minimap2","-t", str(threads),"--secondary=no","-ax", preset, concatenated_contigs] + in_reads
@@ -149,7 +153,11 @@ def map_final_mito(in_reads, threads=1, covMap=20, ont=False):
     except FileNotFoundError:
         sys.exit("""No final_mitogenome.fasta file.
         An error may have occurred when choosing the representative contig.""")
-    
+
+    # Override covMap if ONT
+    if ont:
+        covMap = 5
+        
     # map reads 
     preset = "map-ont" if ont else "map-pb"
     minimap_cmd = ["minimap2", "-t", str(threads), "--secondary=no", "-ax", preset, "final_mitogenome.fasta"] + in_reads
