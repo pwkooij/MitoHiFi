@@ -1,5 +1,5 @@
 """This script builds a plot (`coverage_plot.png`) containing the mean coverage
-depth distribution for the final representative mitogenom and other assembled
+depth distribution for the final representative mitogenome and other assembled
 potential mito contigs. 
 
 """
