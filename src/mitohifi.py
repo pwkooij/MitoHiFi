@@ -48,7 +48,7 @@ def main():
     required = parser.add_argument_group('required arguments')
     optional = parser.add_argument_group('optional arguments')
     mutually_exclusive_group = required.add_mutually_exclusive_group(required=True)    
-    mutually_exclusive_group.add_argument("-r", help= "-r: Pacbio Hifi Reads from your species", metavar='<reads>.fasta')
+    mutually_exclusive_group.add_argument("-r", help= "-r: Pacbio Hifi or ONT Reads from your species", metavar='<reads>.fasta')
     mutually_exclusive_group.add_argument("-c", help= "-c: Assembled fasta contigs/scaffolds to be searched to find mitogenome", metavar='<contigs>.fasta')
     required.add_argument("-f", help= "-f: Close-related Mitogenome is fasta format", required = "True", metavar='<relatedMito>.fasta')
     required.add_argument("-g", help= "-k: Close-related species Mitogenome in genebank format", required = "True", metavar='<relatedMito>.gbk')
@@ -99,7 +99,7 @@ def main():
     # If input are reads, map them to the related mitogenome and assemble the mapped ones
     if args.r:
         logging.info("Running MitoHifi pipeline in reads mode...")
-        logging.info("1. First we map your Pacbio HiFi reads to the close-related mitogenome")
+        logging.info("1. First we map your Pacbio HiFi or ONT reads to the close-related mitogenome")
         # Choose minimap2 preset depending on sequencing technology
         minimap_preset = "map-hifi"
         if args.ont:
