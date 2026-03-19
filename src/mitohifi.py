@@ -37,6 +37,7 @@ from circularizationCheck import circularizationCheck, get_circo_mito
 import alignContigs
 import plot_coverage
 import plot_annotation
+import matplotlib.pyplot as plt
 
 def main():
     
@@ -543,6 +544,7 @@ The pipeline has stopped !! You need to run further scripts to check if you have
         plot_annotation.plot_annotation_mitos("final_mitogenome.gff", "final_mitogenome.annotation.png")
     else:
         plot_annotation.plot_annotation("final_mitogenome.gb", "final_mitogenome.annotation.png")
+    plt.close('all')
     annotation_plots.append("final_mitogenome.annotation.png")
     
     # add other plots following contigs order in `contigs_stats.tsv`
@@ -571,12 +573,14 @@ The pipeline has stopped !! You need to run further scripts to check if you have
                             plot_annotation.plot_annotation_mitos(contig_annotation, contig_annotation_plot)
                         else:
                             plot_annotation.plot_annotation(contig_annotation, contig_annotation_plot)
+                        plt.close('all')
                         annotation_plots.append(contig_annotation_plot)
             else:
                 logging.warning(f"No {contig_annotation} for {contig_id}. Skipping annotation plot for this contig.")
 
     ## concatenating all annotation plots into single final plot
     plot_annotation.merge_images(annotation_plots, "contigs_annotations.png")
+    plt.close('all')
 
     # creating coverage plot (v02)
     if args.r:
