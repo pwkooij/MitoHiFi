@@ -21,6 +21,7 @@ from createCoveragePlot import map_potential_contigs, map_final_mito, get_contig
 import fetch
 import fetch_mitos
 import filterfasta
+import filter_hifiasm_fasta
 import findFrameShifts
 import fixContigHeaders
 import functools
@@ -59,6 +60,7 @@ def main():
     optional.add_argument("-a", help="-a: Choose between animal (default) or plant", default="animal", choices=["animal", "plant", "fungi"])
     optional.add_argument("-p", help="-p: Percentage of query in the blast match with close-related mito", type=int, default=50, metavar='<PERC>')
     optional.add_argument("-m", help="-m: Number of bits for HiFiasm bloom filter [it maps to -f in HiFiasm] (default = 0)", type=int, default=0, metavar='<BLOOM FILTER>')
+    optional.add_argument("--min-contig-len", help="Minimum contig length to retain after hifiasm assembly (default = 0)", type=int, default=0)
     optional.add_argument("--max-read-len", help="Maximum lenght of read relative to related mito (default = 1.0x related mito length)", type=float, default=1.0)
     optional.add_argument("--mitos", help="Use MITOS2 for annotation (opposed to default MitoFinder", action="store_true")
     optional.add_argument('--circular-size', help='Size to consider when checking for circularization', type=int, default=220)
@@ -230,6 +232,14 @@ def main():
             subprocess.run(["cat", "gbk.HiFiMapped.bam.filtered.assembled.p_ctg.fa", "gbk.HiFiMapped.bam.filtered.assembled.a_ctg.fa"], stdout=hifiasm_f)
         
         contigs = "hifiasm.contigs.fasta"
+        
+        # --- NEW: optional contig filtering ---
+        if args.min_contig_len and args.min_contig_len > 0:
+            logging.info(f"Filtering contigs shorter than {args.min_contig_len} bp")
+            
+            filtered_contigs = "hifiasm.contigs.filtered.fasta"
+            
+            contigs = filter_hifiasm_fasta.filter_contigs_by_length(contigs, filtered_contigs, args.min_contig_len)
     
     else:
         logging.info("Running MitoHifi pipeline in contigs mode...")
