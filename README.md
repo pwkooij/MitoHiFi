@@ -133,14 +133,15 @@ python MitoHiFi/src/mitohifi.py -h
 ```
 usage: MitoHiFi [-h] (-r <reads>.fasta | -c <contigs>.fasta) -f
                 <relatedMito>.fasta -g <relatedMito>.gbk -t <THREADS> [-d]
-                [-a {animal,plant,fungi}] [-p <PERC>] [-m <BLOOM FILTER>]
+                [--ont] [-a {animal,plant,fungi}] [-p <PERC>]
+                [-m <BLOOM FILTER>] [--min-contig-len MIN_CONTIG_LEN]
                 [--max-read-len MAX_READ_LEN] [--mitos]
                 [--circular-size CIRCULAR_SIZE]
                 [--circular-offset CIRCULAR_OFFSET] [-winSize WINSIZE]
                 [-covMap COVMAP] [-v] [-o <GENETIC CODE>]
 
 required arguments:
-  -r <reads>.fasta      -r: Pacbio Hifi Reads from your species
+  -r <reads>.fasta      -r: Pacbio Hifi or ONT Reads from your species
   -c <contigs>.fasta    -c: Assembled fasta contigs/scaffolds to be searched
                         to find mitogenome
   -f <relatedMito>.fasta
@@ -152,12 +153,17 @@ required arguments:
 
 optional arguments:
   -d                    -d: debug mode to output additional info on log
+  --ont                 Use Oxford Nanopore (ONT) settings instead of PacBio
+                        HiFi for minimap2 and hifiasm
   -a {animal,plant,fungi}
                         -a: Choose between animal (default) or plant
   -p <PERC>             -p: Percentage of query in the blast match with close-
                         related mito
   -m <BLOOM FILTER>     -m: Number of bits for HiFiasm bloom filter [it maps
                         to -f in HiFiasm] (default = 0)
+  --min-contig-len MIN_CONTIG_LEN
+                        Minimum contig length to retain after hifiasm assembly
+                        (default = 0)
   --max-read-len MAX_READ_LEN
                         Maximum lenght of read relative to related mito
                         (default = 1.0x related mito length)
